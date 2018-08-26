@@ -1,51 +1,11 @@
 module Main where
 
+import Debug.Trace
 import System.IO
 import System.Directory
 -- import System.FilePath
 import Data.String.Utils
 import Control.Monad
-
--- printHomeFiles = homeList >>=
---   (\fl ->
---      mapM_ (\s ->
---              if (startswith emacsd s)
---              then (putStrLn s)
---              else (putStr "")
---              )
---      fl)
-
--- pseudoFiles = do
---   fs <- homeList
---   let ems = (filter (\f -> startswith emacsd f) fs)
---   putStrLn (show ems)
-
--- pseudoFiles2 = homeList >>=
---   (\fs -> putStrLn $ show $ ems fs)
---   where ems fs = (filter (\f -> startswith emacsd f) fs)
-
--- filterPrefixed :: [String] -> [String]
--- filterPrefixed as = filter (\s -> startswith emacsd s) as
-
-
--- prompt :: String -> IO String
--- prompt str = putStr (str ++ " ") >> hFlush stdout >> getLine
-
--- initBuffering :: IO ()
--- initBuffering = mapM_ (\h -> hSetBuffering h LineBuffering) [stdin, stdout]
-
--- printFirstHalfOfSingleString :: String -> IO ()
--- printFirstHalfOfSingleString s = putStrLn (take (length s `div` 2) s)
-
--- printFirstHalfOfEachString :: [String] -> IO ()
--- printFirstHalfOfEachString = mapM_ printFirstHalfOfSingleString
-
--- namify = listDirectory "." >>= printFirstHalfOfEachString
--- homify = homeList >>= printFirstHalfOfEachString
-
--- pattern' = (emacsd++"-")
-
---emacsFolderEntries = filter (\fn -> startswith fn pattern' fn) homeList
 
 homeList :: IO [FilePath]
 homeList = listDirectory "/home/jacek/"
@@ -53,6 +13,9 @@ homeList = listDirectory "/home/jacek/"
 emacsd :: String
 emacsd = ".emacs.d"
 
+default_config_folder = "/home/jacek/.emacs.d"
+
+emacsFolderEntries :: [String] -> [String]
 emacsFolderEntries hl = filter (\f -> startswith emacsd f) hl
 
 print_folder_options configFolders = undefined
@@ -64,15 +27,31 @@ mainThen configFolders = do
     apply_option configFolders
     return ()
 
-check_if_proceed :: a -> Bool
-check_if_proceed configFolders = undefined
+
+check_if_proceed configFolders = do
+  let emacsdf = "/home/jacek/.emacs.d"
+  traceM ("calling check_if_proceed " ++ show ("ccc",configFolders))
+  exists <- doesDirectoryExist emacsdf
+  symlink <- pathIsSymbolicLink emacsdf
+
+  -- if exists
+  --   then
+  --   if symlink
+  --   then 1
+  --   else 2
+  --   else
+  --   3
+  putStrLn $ show (emacsd, exists, symlink)
+
 
 main :: IO ()
 main = do
   hl <- homeList
   let configFolders = emacsFolderEntries hl
   putStrLn (show configFolders)
-  let proceed = check_if_proceed configFolders
-  if proceed
-    then mainThen configFolders
-    else return ()
+  proceed <- check_if_proceed configFolders
+  putStrLn (show proceed)
+  return ()
+  -- if proceed
+  --   then mainThen configFolders
+  --   else return ()
