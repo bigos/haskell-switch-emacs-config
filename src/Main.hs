@@ -33,15 +33,45 @@ check_if_proceed configFolders = do
   traceM ("calling check_if_proceed " ++ show ("ccc",configFolders))
   exists <- doesDirectoryExist emacsdf
   symlink <- pathIsSymbolicLink emacsdf
+  let confemp = configFolders == []
+  let result = False
+  if exists
+    then do
+    {
+      if symlink
+      then do
+        {
+          putStrLn ("This action will overwrite the existing symlink\n"++
+                    "poinitng to " ++ "SOMEWHERE-FINISH ME\n\n" )
+        }
+      else do
+        {
+          putStrLn (emacsdf ++ " is not a symlink\n"++
+                    "to use this utility, in your terminal do soemthing like:\n"++
+                    "$ mv " ++ emacsdf ++ " " ++ emacsdf ++ "-alternative-config\n" ++
+                    "exiting..." )
+        }
+    }
+    else do
+    {
+      putStrLn ("no " ++ emacsdf ++ "found in your home folder")
+      if confemp
+      then do
+        {
+          putStrLn ("nor folders with the alternative emacs config\n" ++
+                    "exiting..." )
 
-  -- if exists
-  --   then
-  --   if symlink
-  --   then 1
-  --   else 2
-  --   else
-  --   3
-  putStrLn $ show (emacsd, exists, symlink)
+        }
+      else
+        do {
+          putStrLn "will try to symlink one of the found folders"
+          }
+    }
+
+
+
+  putStrLn $ show (emacsd, exists, symlink, confemp, result)
+  let result = result
 
 
 main :: IO ()
