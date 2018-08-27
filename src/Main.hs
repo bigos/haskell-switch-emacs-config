@@ -34,54 +34,49 @@ check_if_proceed configFolders = do
   exists <- doesDirectoryExist emacsdf
   symlink <- pathIsSymbolicLink emacsdf
   let confemp = configFolders == []
-  let result = False
-  if exists
-    then do
-    {
-      if symlink
-      then do
-        {
-          putStrLn ("This action will overwrite the existing symlink\n"++
-                    "poinitng to " ++ "SOMEWHERE-FINISH ME\n\n" )
-        }
-      else do
-        {
-          putStrLn (emacsdf ++ " is not a symlink\n"++
-                    "to use this utility, in your terminal do soemthing like:\n"++
-                    "$ mv " ++ emacsdf ++ " " ++ emacsdf ++ "-alternative-config\n" ++
-                    "exiting..." )
-        }
-    }
-    else do
-    {
-      putStrLn ("no " ++ emacsdf ++ "found in your home folder")
-      if confemp
-      then do
-        {
-          putStrLn ("nor folders with the alternative emacs config\n" ++
-                    "exiting..." )
-
-        }
-      else
-        do {
-          putStrLn "will try to symlink one of the found folders"
-          }
-    }
+  let result = do
+        if exists
+          then do
+            if symlink
+              then do
+                putStrLn ("This action will overwrite the existing symlink\n"++
+                          "poinitng to " ++ "SOMEWHERE-FINISH ME\n\n" )
+                return False
+              else do
+                putStrLn (emacsdf ++ " is not a symlink\n"++
+                          "to use this utility, in your terminal do soemthing like:\n"++
+                          "$ mv " ++ emacsdf ++ " " ++ emacsdf ++ "-alternative-config\n" ++
+                          "exiting..." )
+                return True
+          else do
+            putStrLn ("no " ++ emacsdf ++ "found in your home folder")
+            if confemp
+              then do
+                putStrLn ("nor folders with the alternative emacs config\n" ++
+                          "exiting..." )
+                return False
+              else do
+                putStrLn "will try to symlink one of the found folders"
+                return True
+  return result
 
 
+spy res = do
+  traceM ("spying" ++ show res)
+  return res
 
-  putStrLn $ show (emacsd, exists, symlink, confemp, result)
-  let result = result
 
-
-main :: IO ()
 main = do
   hl <- homeList
   let configFolders = emacsFolderEntries hl
   putStrLn (show configFolders)
   proceed <- check_if_proceed configFolders
-  putStrLn (show proceed)
-  return ()
+  proceed >>= (\pro ->
+                 if pro
+                 then putStrLn "proceed yes"
+                 else putStrLn "proceed NO"
+                 )
+  return (1, proceed)
   -- if proceed
   --   then mainThen configFolders
   --   else return ()
