@@ -96,12 +96,12 @@ check_if_proceed configFolders = do
 
   if (result == Jaundecided)
     then do
-      if confemp
-      then do
+      (if confemp
+       then do
           putStrLn  "No alternative config folders found, exiting..." ;
           return Jafalse
-      else do
-          return Jatrue
+       else do
+          return Jatrue)
     else do
       putStrLn $ show result ;
       return result
