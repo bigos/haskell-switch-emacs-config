@@ -56,50 +56,55 @@ check_if_proceed configFolders = do
   exists <- doesDirectoryExist emacsdf
   let confemp = configFolders == []
   result <- do
-        if exists
-          then do
+    if exists
+      then do
+      {
+        symlink <- pathIsSymbolicLink emacsdf ;
+        if symlink
+        then do
           {
-            symlink <- pathIsSymbolicLink emacsdf ;
-            if symlink
-            then do
-              {
-                symlTarget <- getSymbolicLinkTarget emacsdf ;
-                putStrLn ("This action will overwrite the existing symlink\n"++
-                          "pointing to " ++ (show symlTarget) ++"\n\n" ) ;
-                return Jaundecided
-              }
-              else do
-              {
-                putStrLn (emacsdf ++ " is not a symlink\n"++
-                          "to use this utility, in your terminal do something like:\n"++
-                          "$ mv " ++ emacsdf ++ " " ++ emacsdf ++ "-alternative-config\n" ++
-                          "exiting..." ) ;
-                return Jafalse
-              }
+            symlTarget <- getSymbolicLinkTarget emacsdf ;
+            putStrLn ("This action will overwrite the existing symlink\n"++
+                      "pointing to " ++ (show symlTarget) ++"\n\n" ) ;
+            return Jaundecided
           }
-          else do
-            putStrLn ("no " ++ emacsdf ++ " found in your home folder")
-            if confemp
-              then do
-                putStrLn ("nor folders with the alternative emacs config\n" ++
-                          "exiting..." )
-                return Jafalse
-              else do
-                putStrLn "will try to symlink one of the found folders"
-                return Jaundecided
+        else do
+          {
+            putStrLn (emacsdf ++ " is not a symlink\n"++
+                      "to use this utility, in your terminal do something like:\n"++
+                      "$ mv " ++ emacsdf ++ " " ++ emacsdf ++ "-alternative-config\n" ++
+                      "exiting..." ) ;
+            return Jafalse
+          }
+      }
+      else do
+      {
+        putStrLn ("no " ++ emacsdf ++ " found in your home folder") ;
+        if confemp
+        then do
+          {
+            putStrLn ("nor folders with the alternative emacs config\n" ++
+                      "exiting..." ) ;
+            return Jafalse
+          }
+        else do
+          {
+            putStrLn "will try to symlink one of the found folders" ;
+            return Jaundecided
+          }
+      }
 
   if (result == Jaundecided)
     then do
       if confemp
-        then do
-          putStrLn  "No alternative config folders found, exiting..."
+      then do
+          putStrLn  "No alternative config folders found, exiting..." ;
           return Jafalse
-        else do
+      else do
           return Jatrue
     else do
-      putStrLn $ show result
+      putStrLn $ show result ;
       return result
-
 
 main = do
   hl <- homeList
