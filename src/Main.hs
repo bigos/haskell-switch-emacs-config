@@ -18,15 +18,13 @@ default_config_folder = "/home/jacek/.emacs.d"
 emacsFolderEntries :: [String] -> [String]
 emacsFolderEntries hl = filter (\f -> startswith emacsd f) hl
 
-print_folder_options configFolders = undefined
+print_folder_options configFolders = do
+  traceM ("calling print_folder_options " ++ show ("ccc",configFolders))
+  return 1
 
-apply_option configFolders = undefined
-
-mainThen configFolders = do
-    print_folder_options configFolders
-    apply_option configFolders
-    return ()
-
+apply_option configFolders = do
+  traceM ("calling apply_option " ++ show ("ccc",configFolders))
+  return 1
 
 check_if_proceed configFolders = do
   let emacsdf = "/home/jacek/.emacs.d"
@@ -39,12 +37,13 @@ check_if_proceed configFolders = do
           then do
             if symlink
               then do
+                symlTarget <- getSymbolicLinkTarget emacsdf
                 putStrLn ("This action will overwrite the existing symlink\n"++
-                          "poinitng to " ++ "SOMEWHERE-FINISH ME\n\n" )
+                          "pointing to " ++ (show symlTarget) ++"\n\n" )
                 return 2
               else do
                 putStrLn (emacsdf ++ " is not a symlink\n"++
-                          "to use this utility, in your terminal do soemthing like:\n"++
+                          "to use this utility, in your terminal do something like:\n"++
                           "$ mv " ++ emacsdf ++ " " ++ emacsdf ++ "-alternative-config\n" ++
                           "exiting..." )
                 return 0
@@ -61,21 +60,23 @@ check_if_proceed configFolders = do
   if (confemp)
     then do
       putStrLn  "No alternative config folders found, exiting..."
-      return False
+      return 0
     else do
-      return True
+      putStrLn "Final else"
+      return 1
+
 
 main = do
   hl <- homeList
   let configFolders = emacsFolderEntries hl
   putStrLn (show configFolders)
   proceed <- check_if_proceed configFolders
-  -- proceed >>= (\pro ->
-  --                if pro
-  --                then putStrLn "proceed yes"
-  --                else putStrLn "proceed NO"
-  --                )
-  return (1, proceed)
-  -- if proceed
-  --   then mainThen configFolders
-  --   else return ()
+  if (proceed == 1)
+    then do
+      putStrLn "going to do then "
+      print_folder_options configFolders
+      apply_option configFolders
+      return ()
+    else do
+      putStrLn "not going anything"
+      return ()
