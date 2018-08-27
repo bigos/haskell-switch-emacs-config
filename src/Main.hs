@@ -58,19 +58,25 @@ check_if_proceed configFolders = do
   result <- do
         if exists
           then do
-            symlink <- pathIsSymbolicLink emacsdf
+          {
+            symlink <- pathIsSymbolicLink emacsdf ;
             if symlink
-              then do
-                symlTarget <- getSymbolicLinkTarget emacsdf
+            then do
+              {
+                symlTarget <- getSymbolicLinkTarget emacsdf ;
                 putStrLn ("This action will overwrite the existing symlink\n"++
-                          "pointing to " ++ (show symlTarget) ++"\n\n" )
+                          "pointing to " ++ (show symlTarget) ++"\n\n" ) ;
                 return Jaundecided
+              }
               else do
+              {
                 putStrLn (emacsdf ++ " is not a symlink\n"++
                           "to use this utility, in your terminal do something like:\n"++
                           "$ mv " ++ emacsdf ++ " " ++ emacsdf ++ "-alternative-config\n" ++
-                          "exiting..." )
+                          "exiting..." ) ;
                 return Jafalse
+              }
+          }
           else do
             putStrLn ("no " ++ emacsdf ++ " found in your home folder")
             if confemp
