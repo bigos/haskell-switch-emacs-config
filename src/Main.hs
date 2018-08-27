@@ -27,22 +27,27 @@ input prompt = do
   getLine
 
 print_folder_options configFolders = do
-  traceM ("calling print_folder_options " ++ show ("ccc",configFolders))
+  -- traceM ("calling print_folder_options " ++ show ("ccc",configFolders))
   putStrLn "Select emacs config number"
   mapM (\x-> putStrLn $(show x) ++ " - " ++ configFolders!!x) [ 0 .. (pred (length configFolders))]
   return ()
 
 apply_option configFolders = do
-  traceM ("calling apply_option " ++ show ("ccc",configFolders))
+  -- traceM ("calling apply_option " ++ show ("ccc",configFolders))
   opt' <- input "Option"
   let opt = (read opt') :: Int
   let optf = configFolders!!opt
   putStrLn $ show optf
-  fex <- (doesFileExist default_config_folder)
+  fex <- (doesDirectoryExist default_config_folder)
   if fex
-    then do removeFile default_config_folder
-    else do return ()
+    then do
+      putStrLn "removing folder"
+      removeFile default_config_folder
+    else do
+      putStrLn ("not doing anything " ++ (show fex))
+      return ()
   createDirectoryLink optf default_config_folder
+  putStrLn "created symlink"
   return 1
 
 check_if_proceed configFolders = do
@@ -67,7 +72,7 @@ check_if_proceed configFolders = do
                           "exiting..." )
                 return Jafalse
           else do
-            putStrLn ("no " ++ emacsdf ++ "found in your home folder")
+            putStrLn ("no " ++ emacsdf ++ " found in your home folder")
             if confemp
               then do
                 putStrLn ("nor folders with the alternative emacs config\n" ++
@@ -79,12 +84,12 @@ check_if_proceed configFolders = do
 
   if (result == Jaundecided)
     then do
-     if confemp
-       then do
-         putStrLn  "No alternative config folders found, exiting..."
-         return Jafalse
-       else do
-         return Jatrue
+      if confemp
+        then do
+          putStrLn  "No alternative config folders found, exiting..."
+          return Jafalse
+        else do
+          return Jatrue
     else do
       putStrLn $ show result
       return result
@@ -97,7 +102,7 @@ main = do
   proceed <- check_if_proceed configFolders
   if (proceed == Jatrue)
     then do
-      putStrLn "going to do then "
+      -- putStrLn "going to do then "
       print_folder_options configFolders
       apply_option configFolders
       return ()
