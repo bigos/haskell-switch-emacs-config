@@ -41,41 +41,40 @@ check_if_proceed configFolders = do
               then do
                 putStrLn ("This action will overwrite the existing symlink\n"++
                           "poinitng to " ++ "SOMEWHERE-FINISH ME\n\n" )
-                return False
+                return 2
               else do
                 putStrLn (emacsdf ++ " is not a symlink\n"++
                           "to use this utility, in your terminal do soemthing like:\n"++
                           "$ mv " ++ emacsdf ++ " " ++ emacsdf ++ "-alternative-config\n" ++
                           "exiting..." )
-                return True
+                return 0
           else do
             putStrLn ("no " ++ emacsdf ++ "found in your home folder")
             if confemp
               then do
                 putStrLn ("nor folders with the alternative emacs config\n" ++
                           "exiting..." )
-                return False
+                return 0
               else do
                 putStrLn "will try to symlink one of the found folders"
-                return True
-  return result
-
-
-spy res = do
-  traceM ("spying" ++ show res)
-  return res
-
+                return 2
+  if (confemp)
+    then do
+      putStrLn  "No alternative config folders found, exiting..."
+      return False
+    else do
+      return True
 
 main = do
   hl <- homeList
   let configFolders = emacsFolderEntries hl
   putStrLn (show configFolders)
   proceed <- check_if_proceed configFolders
-  proceed >>= (\pro ->
-                 if pro
-                 then putStrLn "proceed yes"
-                 else putStrLn "proceed NO"
-                 )
+  -- proceed >>= (\pro ->
+  --                if pro
+  --                then putStrLn "proceed yes"
+  --                else putStrLn "proceed NO"
+  --                )
   return (1, proceed)
   -- if proceed
   --   then mainThen configFolders
